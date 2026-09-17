@@ -197,12 +197,12 @@ if ($action == 'get_live_streams') {
     }
 } elseif ($action == 'get_series') {
     header('Content-Type: application/json');
+    $channels = [];
+    $currentChannel = [];
 
-    for ($i = 1; $i <= 30; $i++) {
+    for ($i = 1; $i <= 1; $i++) {
         $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/tvshows/$i");
         $lines = explode("\n", $m3uContent);
-        $channels = [];
-        $currentChannel = [];
 
         foreach ($lines as $line) {
             $line = trim($line);
@@ -218,7 +218,7 @@ if ($action == 'get_live_streams') {
                 
                 // Extract Channel Number for ID
                 preg_match('/tvg-id="tt([^"]+)"/', $line, $chnoMatches);
-                $currentChannel['series_id'] = (int)$chnoMatches[1] ?? rand(100000, 999999);
+                $currentChannel['series_id'] = (int)$chnoMatches[1];
 
                 // Extract Group Title for Category ID
                 //preg_match('/group-title="([^"]+)"/', $line, $groupMatches);
