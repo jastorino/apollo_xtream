@@ -224,7 +224,7 @@ if ($action == 'get_live_streams') {
                 //preg_match('/group-title="([^"]+)"/', $line, $groupMatches);
                 $currentChannel['category_id'] = strval($i); //$groupMatches[1] ?? '';    
 
-                if (!in_array((int)$chnoMatches[1], $channels)) {
+                if (!in_array($cleanString, $channels)) {
                     $channels[] = $currentChannel;
                 }
                 $currentChannel = [];
