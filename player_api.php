@@ -199,6 +199,7 @@ if ($action == 'get_live_streams') {
     header('Content-Type: application/json');
     $channels = [];
     $currentChannel = [];
+    $uniqueGroups = [];
 
     for ($i = 1; $i <= 1; $i++) {
         $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/tvshows/$i");
@@ -224,7 +225,8 @@ if ($action == 'get_live_streams') {
                 //preg_match('/group-title="([^"]+)"/', $line, $groupMatches);
                 $currentChannel['category_id'] = strval($i); //$groupMatches[1] ?? '';    
 
-                if (!in_array($cleanString, $channels)) {
+                if (!in_array($cleanString, $uniqueGroups)) {
+                    $uniqueGroups[] = $cleanString;
                     $channels[] = $currentChannel;
                 }
                 $currentChannel = [];
