@@ -3,15 +3,17 @@ header('Content-Type: application/json');
 
 $action = isset($_GET['action']) ? $_GET['action'] : 'auth';
 $user = isset($_GET['username']) ? $_GET['username'] : 'unknown';
+$password = isset($_GET['password']) ? $_GET['password'] : 'unknown';
 
 // Log the incoming request
-error_log("IPTV Request - User: $user, Action: $action");
+error_log("IPTV Request - User: $user, Password: $password Action: $action");
+
 
 if ($action == 'get_live_streams') {
     error_log("Found Action: $action");
     header('Content-Type: application/json');
 
-    $m3uContent = file_get_contents('https://tvnow.best/api/list/john@astorino.net/883468/m3u8/livetv');
+    $m3uContent = file_get_contents("https://tvnow.best/api/list/$username/$password/m3u8/livetv");
     $lines = explode("\n", $m3uContent);
     $channels = [];
     $currentChannel = [];
@@ -48,7 +50,7 @@ if ($action == 'get_live_streams') {
     error_log("Found Action: $action");
     header('Content-Type: application/json');
 
-    $m3uContent = file_get_contents('https://tvnow.best/api/list/john@astorino.net/883468/m3u8/livetv');
+    $m3uContent = file_get_contents("https://tvnow.best/api/list/$username/$password/m3u8/livetv");
     $lines = explode("\n", $m3uContent);
     $categories = [];
     $uniqueGroups = [];
