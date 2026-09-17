@@ -10,7 +10,6 @@ error_log("IPTV Request - User: $user, Password: $password Action: $action");
 
 
 if ($action == 'get_live_streams') {
-    error_log("Found Action: $action");
     header('Content-Type: application/json');
 
     $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/livetv");
@@ -49,7 +48,6 @@ if ($action == 'get_live_streams') {
 
     echo json_encode($channels); 
 } elseif ($action == 'get_live_categories') {
-    error_log("Found Action: $action");
     header('Content-Type: application/json');
 
     $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/livetv");
@@ -78,7 +76,6 @@ if ($action == 'get_live_streams') {
     }      
     echo json_encode($categories); 
 } elseif ($action == 'get_vod_streams') {
-    error_log("Found Action: $action");
     header('Content-Type: application/json');
 
     $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/movies");
@@ -115,7 +112,6 @@ if ($action == 'get_live_streams') {
 
     echo json_encode($channels); 
 } elseif ($action == 'get_vod_categories') {
-    error_log("Found Action: $action");
     header('Content-Type: application/json');
 
     $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/movies");
@@ -200,37 +196,73 @@ if ($action == 'get_live_streams') {
         break;
     }
 } elseif ($action == 'get_series') {
-    error_log("Found Action: $action");
-    echo json_encode([
-        [
-            "category_id" => "2000",
-            "series_id" => 5000,
-            "name" => "The Beverly Hillbillies",
-            "cover" => "https://resizing.flixster.com/5kjb42IRSeDBUctfkk0rL-Vkr3I=/164x246/v2/https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p15108_p_v10_af.jpg",
-            "plot" => "A poor backwoods family strikes oil and moves to Beverly Hills."
-        ],
-        [
-            "category_id" => "2000",
-            "series_id" => 5001,
-            "name" => "The Dick Van Dyke Show",
-            "cover" => "https://resizing.flixster.com/UxPN62SpdQIxfQ5i1EWeyU6HeNQ=/164x246/v2/https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p184002_b_v11_ag.jpg",
-            "plot" => "The misadventures of a TV writer both at work and at home."
-        ],
-        [
-            "category_id" => "2000",
-            "series_id" => 5003,
-            "name" => "The Lucy Show",
-            "cover" => "https://resizing.flixster.com/eHarJ7bCr-YokoVSeOWGcano2T4=/164x246/v2/https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p507901_b_v10_ad.jpg",
-            "plot" => "The comic misadventures of a widow and her friend."
-        ],
-        [
-            "category_id" => "2000",
-            "series_id" => 5004,
-            "name" => "Sherlock Holmes (1954)",
-            "cover" => "https://marvel-b1-cdn.bc0a.com/f00000000280066/cover.hoopladigital.com/qsv_5289101_640.jpeg",
-            "plot" => "The classic detective solves mysteries in Victorian London."
-        ]
-    ]);
+    header('Content-Type: application/json');
+
+    for ($i = 1; $i <= 30; $i++) {
+        $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/tvshows/$i");
+        $lines = explode("\n", $m3uContent);
+        $channels = [];
+        $currentChannel = [];
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (strpos($line, '#EXTINF:') === 0) {
+                // Extract Name
+                preg_match('/,(.+)$/', $line, $nameMatches);
+                $currentChannel['name'] = $nameMatches[1] ?? 'Unknown';
+                
+                // Extract Logo
+                preg_match('/tvg-logo="([^"]+)"/', $line, $logoMatches);
+                $currentChannel['stream_icon'] = $logoMatches[1] ?? '';
+                
+                // Extract Channel Number for ID
+                preg_match('/tvg-id="tt([^"]+)"/', $line, $chnoMatches);
+                $currentChannel['stream_id'] = (int)$chnoMatches[1] ?? rand(100000, 999999);
+
+                // Extract Group Title for Category ID
+                preg_match('/group-title="([^"]+)"/', $line, $groupMatches);
+                $currentChannel['category_id'] = $groupMatches[1] ?? '';    
+                
+                $currentChannel['stream_type'] = 'movie';
+            } elseif (strpos($line, 'http') === 0) {
+                $currentChannel['direct_source'] = $line;
+                $channels[] = $currentChannel;
+                $currentChannel = [];
+            }
+        }
+    }
+
+    echo json_encode($channels); 
+} elseif ($action == 'get_series_categories') {
+/*    header('Content-Type: application/json');
+
+    for ($i = 1; $i <= 30; $i++) {
+        $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/tvshows/$i");
+        $lines = explode("\n", $m3uContent);
+        $categories = [];
+        $uniqueGroups = [];
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (strpos($line, '#EXTINF:') === 0) {
+                // Extract Group Title
+                preg_match('/group-title="([^"]+)"/', $line, $groupMatches);
+                $groupTitle = $groupMatches[1] ?? '';
+                
+                // If a group title exists and we haven't seen it yet
+                if (!empty($groupTitle) && !in_array($groupTitle, $uniqueGroups)) {
+                    $uniqueGroups[] = $groupTitle;
+                    
+                    $categories[] = [
+                        "category_id" => $groupTitle,
+                        "category_name" => $groupTitle,
+                        "parent_id" => 0
+                    ];
+                }
+            }
+        }      
+    }
+    echo json_encode($categories); */
 } elseif ($action == 'get_series_info') {
     $series_id = isset($_GET['series_id']) ? (int)$_GET['series_id'] : 0;
     
@@ -354,15 +386,6 @@ if ($action == 'get_live_streams') {
     }
     
     echo json_encode($response);
-} elseif ($action == 'get_series_categories') {
-    error_log("Found Action: $action");
-    echo json_encode([
-        [
-            "category_id" => "2000",
-            "category_name" => "Oldies",
-            "parent_id" => 0
-        ]
-    ]);
 } else {
     echo json_encode([
         "user_info" => ["username" => "demo", "status" => "Active", "exp_date" => "1999999999"],
