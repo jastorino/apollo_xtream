@@ -209,24 +209,24 @@ if ($action == 'get_live_streams') {
             if (strpos($line, '#EXTINF:') === 0) {
                 // Extract Name
                 preg_match('/,(.+)$/', $line, $nameMatches);
-                $currentChannel['name'] = $nameMatches[1] ?? 'Unknown';
+                $cleanString = preg_replace('/\s\(\d{4}\)\sS\d{2}\sE\d{2}/', '', $nameMatches[1]);
+                $currentChannel['name'] = $cleanString ?? 'Unknown';
                 
                 // Extract Logo
                 preg_match('/tvg-logo="([^"]+)"/', $line, $logoMatches);
-                $currentChannel['stream_icon'] = $logoMatches[1] ?? '';
+                $currentChannel['cover'] = $logoMatches[1] ?? '';
                 
                 // Extract Channel Number for ID
                 preg_match('/tvg-id="tt([^"]+)"/', $line, $chnoMatches);
-                $currentChannel['stream_id'] = (int)$chnoMatches[1] ?? rand(100000, 999999);
+                $currentChannel['series_id'] = (int)$chnoMatches[1] ?? rand(100000, 999999);
 
                 // Extract Group Title for Category ID
                 //preg_match('/group-title="([^"]+)"/', $line, $groupMatches);
                 $currentChannel['category_id'] = strval($i); //$groupMatches[1] ?? '';    
-                
-                $currentChannel['stream_type'] = 'movie';
-            } elseif (strpos($line, 'http') === 0) {
-                $currentChannel['direct_source'] = $line;
-                $channels[] = $currentChannel;
+
+                if (!in_array((int)$chnoMatches[1], $channels)) {
+                    $channels[] = $currentChannel;
+                }
                 $currentChannel = [];
             }
         }
