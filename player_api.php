@@ -17,9 +17,11 @@ if ($action == 'get_live_streams') {
     $lines = explode("\n", $m3uContent);
     $channels = [];
     $currentChannel = [];
+    $lineNum = 0;
 
     foreach ($lines as $line) {
         $line = trim($line);
+        $lineNum = $lineNum + 1;
         if (strpos($line, '#EXTINF:') === 0) {
             // Extract Name
             preg_match('/,(.+)$/', $line, $nameMatches);
@@ -30,8 +32,8 @@ if ($action == 'get_live_streams') {
             $currentChannel['stream_icon'] = $logoMatches[1] ?? '';
             
             // Extract Channel Number for ID
-            preg_match('/tvg-id="([^"]+)"/', $line, $chnoMatches);
-            $currentChannel['stream_id'] = ($chnoMatches[1] ?? '');
+            //preg_match('/tvg-id="([^"]+)"/', $line, $chnoMatches);
+            $currentChannel['stream_id'] = $lineNum;
 
             // Extract Group Title for Category ID
             preg_match('/group-title="([^"]+)"/', $line, $groupMatches);
