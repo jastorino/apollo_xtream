@@ -220,8 +220,8 @@ if ($action == 'get_live_streams') {
                 $currentChannel['stream_id'] = (int)$chnoMatches[1] ?? rand(100000, 999999);
 
                 // Extract Group Title for Category ID
-                preg_match('/group-title="([^"]+)"/', $line, $groupMatches);
-                $currentChannel['category_id'] = $groupMatches[1] ?? '';    
+                //preg_match('/group-title="([^"]+)"/', $line, $groupMatches);
+                $currentChannel['category_id'] = "$i"; //$groupMatches[1] ?? '';    
                 
                 $currentChannel['stream_type'] = 'movie';
             } elseif (strpos($line, 'http') === 0) {
@@ -250,12 +250,13 @@ if ($action == 'get_live_streams') {
                 $groupTitle = $groupMatches[1] ?? '';
                 
                 // If a group title exists and we haven't seen it yet
-                if (!empty($groupTitle) && !in_array($groupTitle, $uniqueGroups)) {
-                    $uniqueGroups[] = $groupTitle;
+                //if (!empty($groupTitle) && !in_array($groupTitle, $uniqueGroups)) {
+                if (!empty("$i") && !in_array("$"groupTitle", $uniqueGroups)) {
+                    $uniqueGroups[] = "$i"; //$groupTitle;
                     
                     $categories[] = [
-                        "category_id" => $groupTitle,
-                        "category_name" => $groupTitle,
+                        "category_id" => "$i", //$groupTitle,
+                        "category_name" => "$i", //$groupTitle,
                         "parent_id" => 0
                     ];
                 }
