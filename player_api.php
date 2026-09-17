@@ -227,7 +227,7 @@ if ($action == 'get_live_streams') {
 
                 if (!in_array($cleanString, $uniqueGroups)) {
                     $uniqueGroups[] = $cleanString;
-                    //$channels[] = $currentChannel;
+                    $channels[] = $currentChannel;
                 }
                 $currentChannel = [];
             }
