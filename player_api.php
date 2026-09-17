@@ -13,7 +13,7 @@ if ($action == 'get_live_streams') {
     error_log("Found Action: $action");
     header('Content-Type: application/json');
 
-    $m3uContent = file_get_contents("https://tvnow.best/api/list/$username/$password/m3u8/livetv");
+    $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/livetv");
     $lines = explode("\n", $m3uContent);
     $channels = [];
     $currentChannel = [];
@@ -50,7 +50,7 @@ if ($action == 'get_live_streams') {
     error_log("Found Action: $action");
     header('Content-Type: application/json');
 
-    $m3uContent = file_get_contents("https://tvnow.best/api/list/$username/$password/m3u8/livetv");
+    $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/livetv");
     $lines = explode("\n", $m3uContent);
     $categories = [];
     $uniqueGroups = [];
