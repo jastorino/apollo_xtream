@@ -236,11 +236,11 @@ if ($action == 'get_live_streams') {
 } elseif ($action == 'get_series_categories') {
     header('Content-Type: application/json');
 
+    $categories = [];
+    $uniqueGroups = [];
     for ($i = 1; $i <= 30; $i++) {
         $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/tvshows/$i");
         $lines = explode("\n", $m3uContent);
-        $categories = [];
-        $uniqueGroups = [];
 
         foreach ($lines as $line) {
             $line = trim($line);
