@@ -79,44 +79,70 @@ if ($action == 'get_live_streams') {
     echo json_encode($categories); 
 } elseif ($action == 'get_vod_streams') {
     error_log("Found Action: $action");
-    echo json_encode([
-        [
-            "category_id" => "3000",
-            "stream_id" => 100,
-            "name" => "My Man godfrey",
-            "stream_type" => "movie",
-            "container_extension" => "mp4",
-            "stream_icon" => "https://images.justwatch.com/poster/35151046/s332/my-man-godfrey.avif",
-            "direct_source" => "https://dn600307.us.archive.org/0/items/MyManGodfrey1936/MyManGodfrey1936_512kb.mp4"
-        ],
-        [
-            "category_id" => "3000",
-            "stream_id" => 101,
-            "name" => "Kansas City Confidential",
-            "stream_type" => "movie",
-            "container_extension" => "mp4",
-            "stream_icon" => "https://images.justwatch.com/poster/134524696/s332/kansas-city-confidential.avif",
-            "direct_source" => "https://dn720304.ca.archive.org/0/items/kansas-city-confidential-1952_202307/Kansas%20City%20Confidential%20%281952%29.mp4"
-        ],
-        [
-            "category_id" => "3000",
-            "stream_id" => 102,
-            "name" => "House On Hunted Hill",
-            "stream_type" => "movie",
-            "container_extension" => "mp4",
-            "stream_icon" => "https://images.justwatch.com/poster/354328131/s332/house-on-haunted-hill-1.avif",
-            "direct_source" => "https://dn720307.ca.archive.org/0/items/house-of-hunted-hill-4-k/HouseOfHuntedHill4K.mp4"
-        ],
-        [
-            "category_id" => "3000",
-            "stream_id" => 103,
-            "name" => "Sunrise: A Song of Two Humans",
-            "stream_type" => "movie",
-            "container_extension" => "mp4",
-            "stream_icon" => "https://images.justwatch.com/poster/302413789/s332/sunrise-a-song-of-two-humans.avif",
-            "direct_source" => "https://dn711400.ca.archive.org/0/items/sunrise.-a.-song.-of.-two.-humans.-1927.720p.-blu-ray.x-264-hdclub-public-hd/Sunrise.A.Song.Of.Two.Humans.1927.720p.BluRay.x264-HDCLUB%20%5BPublicHD%5D.mp4"
-        ]
-    ]);
+    header('Content-Type: application/json');
+
+    $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/movies");
+    $lines = explode("\n", $m3uContent);
+    $channels = [];
+    $currentChannel = [];
+
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (strpos($line, '#EXTINF:') === 0) {
+            // Extract Name
+            preg_match('/,(.+)$/', $line, $nameMatches);
+            $currentChannel['name'] = $nameMatches[1] ?? 'Unknown';
+            
+            // Extract Logo
+            preg_match('/tvg-logo="([^"]+)"/', $line, $logoMatches);
+            $currentChannel['stream_icon'] = $logoMatches[1] ?? '';
+            
+            // Extract Channel Number for ID
+            preg_match('/tvg-id=tt"([^"]+)"/', $line, $chnoMatches);
+            $currentChannel['stream_id'] = (int)$chnoMatches[1] ?? and(10000, 99999);
+
+            // Extract Group Title for Category ID
+            preg_match('/group-title="([^"]+)"/', $line, $groupMatches);
+            $currentChannel['category_id'] = $groupMatches[1] ?? '';    
+            
+            $currentChannel['stream_type'] = 'movie';
+        } elseif (strpos($line, 'http') === 0) {
+            $currentChannel['direct_source'] = $line;
+            $channels[] = $currentChannel;
+            $currentChannel = [];
+        }
+    }
+
+    echo json_encode($channels); 
+} elseif ($action == 'get_vod_categories') {
+    error_log("Found Action: $action");
+    header('Content-Type: application/json');
+
+    $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/movies");
+    $lines = explode("\n", $m3uContent);
+    $categories = [];
+    $uniqueGroups = [];
+
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (strpos($line, '#EXTINF:') === 0) {
+            // Extract Group Title
+            preg_match('/group-title="([^"]+)"/', $line, $groupMatches);
+            $groupTitle = $groupMatches[1] ?? '';
+            
+            // If a group title exists and we haven't seen it yet
+            if (!empty($groupTitle) && !in_array($groupTitle, $uniqueGroups)) {
+                $uniqueGroups[] = $groupTitle;
+                
+                $categories[] = [
+                    "category_id" => $groupTitle,
+                    "category_name" => $groupTitle,
+                    "parent_id" => 0
+                ];
+            }
+        }
+    }      
+    echo json_encode($categories); 
 } elseif ($action == 'get_vod_info') {
     $vod_id = isset($_GET['vod_id']) ? $_GET['vod_id'] : 0;
     
@@ -328,15 +354,6 @@ if ($action == 'get_live_streams') {
     }
     
     echo json_encode($response);
-} elseif ($action == 'get_vod_categories') {
-    error_log("Found Action: $action");
-    echo json_encode([
-        [
-            "category_id" => "3000",
-            "category_name" => "Oldies",
-            "parent_id" => 0
-        ]
-    ]);    
 } elseif ($action == 'get_series_categories') {
     error_log("Found Action: $action");
     echo json_encode([
