@@ -234,7 +234,7 @@ if ($action == 'get_live_streams') {
 
     echo json_encode($channels); 
 } elseif ($action == 'get_series_categories') {
-/*    header('Content-Type: application/json');
+    header('Content-Type: application/json');
 
     for ($i = 1; $i <= 30; $i++) {
         $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/tvshows/$i");
@@ -262,7 +262,7 @@ if ($action == 'get_live_streams') {
             }
         }      
     }
-    echo json_encode($categories); */
+    echo json_encode($categories);
 } elseif ($action == 'get_series_info') {
     $series_id = isset($_GET['series_id']) ? (int)$_GET['series_id'] : 0;
     
