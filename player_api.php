@@ -210,7 +210,7 @@ if ($action == 'get_live_streams') {
             if (strpos($line, '#EXTINF:') === 0) {
                 // Extract Name
                 preg_match('/,(.+)$/', $line, $nameMatches);
-                $cleanString = preg_replace('/\s\(\d{4}\)\sS\d{2+}\sE\d{2+}/', '', $nameMatches[1]);
+                $cleanString = preg_replace('/\s\(\d{4}\)\sS\d{2}\sE\d{2}/', '', $nameMatches[1]);
                 $currentChannel['name'] = $cleanString ?? 'Unknown';
                 
                 // Extract Logo
