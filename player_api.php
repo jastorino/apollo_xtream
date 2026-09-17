@@ -221,7 +221,7 @@ if ($action == 'get_live_streams') {
 
                 // Extract Group Title for Category ID
                 //preg_match('/group-title="([^"]+)"/', $line, $groupMatches);
-                $currentChannel['category_id'] = "$i"; //$groupMatches[1] ?? '';    
+                $currentChannel['category_id'] = strval($i); //$groupMatches[1] ?? '';    
                 
                 $currentChannel['stream_type'] = 'movie';
             } elseif (strpos($line, 'http') === 0) {
@@ -241,6 +241,7 @@ if ($action == 'get_live_streams') {
     for ($i = 1; $i <= 30; $i++) {
         $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/tvshows/$i");
         $lines = explode("\n", $m3uContent);
+        $catID = strval($i)
 
         foreach ($lines as $line) {
             $line = trim($line);
@@ -251,12 +252,12 @@ if ($action == 'get_live_streams') {
                 
                 // If a group title exists and we haven't seen it yet
                 //if (!empty($groupTitle) && !in_array($groupTitle, $uniqueGroups)) {
-                if (!empty("$i") && !in_array("$1", $uniqueGroups)) {
-                    $uniqueGroups[] = "$i"; //$groupTitle;
+                if (!empty($catID) && !in_array($catID, $uniqueGroups)) {
+                    $uniqueGroups[] = $catID; //$groupTitle;
                     
                     $categories[] = [
-                        "category_id" => "$i", //$groupTitle,
-                        "category_name" => "$i", //$groupTitle,
+                        "category_id" => $catID, //$groupTitle,
+                        "category_name" => $catID, //$groupTitle,
                         "parent_id" => 0
                     ];
                 }
