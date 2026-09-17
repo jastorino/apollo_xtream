@@ -251,7 +251,7 @@ if ($action == 'get_live_streams') {
                 
                 // If a group title exists and we haven't seen it yet
                 //if (!empty($groupTitle) && !in_array($groupTitle, $uniqueGroups)) {
-                if (!empty("$i") && !in_array("$"groupTitle", $uniqueGroups)) {
+                if (!empty("$i") && !in_array("$1", $uniqueGroups)) {
                     $uniqueGroups[] = "$i"; //$groupTitle;
                     
                     $categories[] = [
