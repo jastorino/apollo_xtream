@@ -99,7 +99,7 @@ if ($action == 'get_live_streams') {
             
             // Extract Channel Number for ID
             preg_match('/tvg-id=tt"([^"]+)"/', $line, $chnoMatches);
-            $currentChannel['stream_id'] = (int)$chnoMatches[1] ?? and(10000, 99999);
+            $currentChannel['stream_id'] = (int)$chnoMatches[1] ?? rand(10000, 99999);
 
             // Extract Group Title for Category ID
             preg_match('/group-title="([^"]+)"/', $line, $groupMatches);
