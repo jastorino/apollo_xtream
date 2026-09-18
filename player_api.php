@@ -86,9 +86,9 @@ if ($action == 'get_live_streams') {
     $count = 0;
 
     foreach ($lines as $line) {
-        $count = $count + 1;
         $line = trim($line);
         if (strpos($line, '#EXTINF:') === 0) {
+            $count = $count + 1;
             // Extract Channel Number for ID
             preg_match('/tvg-id="([^"]+)"/', $line, $chnoMatches);
             $currentChannel['stream_id'] = $chnoMatches[1];
@@ -106,7 +106,7 @@ if ($action == 'get_live_streams') {
             $channels[] = $currentChannel;
             $currentChannel = [];
         }
-        if ($count === 10) {
+        if ($count === 100) {
             break;
         }
     }
@@ -145,60 +145,17 @@ if ($action == 'get_live_streams') {
     echo json_encode($categories); 
 } elseif ($action == 'get_vod_info') {
     $vod_id = isset($_GET['vod_id']) ? $_GET['vod_id'] : 0;
-    
-    switch ($vod_id) {
-    case '100':
-        echo json_encode([
-            "info" => [
-                "plot" => "Fifth Avenue socialite Irene Bullock needs a forgotten man to win a scavenger hunt, and no one is more forgotten than Godfrey Park, who resides in a dump by the East River. Irene hires Godfrey as a servant for her riotously unhinged family, to the chagrin of her spoiled sister, Cornelia, who tries her best to get Godfrey fired. As Irene falls for her new butler, Godfrey turns the tables and teaches the frivolous Bullocks a lesson or two.",
-                "releasedate" => "1936",
-                "rating" => "7.9",
-                "genre" => "Comedy, Romance",
-                "duration" => "93 min",
-                "movie_image" => "https://images.justwatch.com/poster/35151046/s332/my-man-godfrey.avif"
-            ]
-        ]);    
-        break;        
-    case '101':
-        echo json_encode([
-            "info" => [
-                "plot" => "A down-on-his-luck ex-GI finds himself framed for an armored car robbery. When he's finally released for lack of evidence--after having been beaten up and tortured by the police--he sets out to discover who set him up, and why. The trail leads him into Mexico and a web of hired killers and corrupt cops.",
-                "releasedate" => "1952",
-                "rating" => "7.3",
-                "genre" => "Crime, Drama, Mystery & Thriller, Organized Crime",
-                "duration" => "100 min",
-                "movie_image" => "https://images.justwatch.com/poster/134524696/s332/kansas-city-confidential.avif"
-            ]
-        ]);    
-        break;        
-    case '102':
-        echo json_encode([
-            "info" => [
-                "plot" => "A down-on-his-luck ex-GI finds himself framed for an armored car robbery. When he's finally released for lack of evidence--after having been beaten up and tortured by the police--he sets out to discover who set him up, and why. The trail leads him into Mexico and a web of hired killers and corrupt cops.",
-                "releasedate" => "1952",
-                "rating" => "6.7",
-                "genre" => "Crime, Horror, Mystery & Thriller, Paranormal",
-                "duration" => "75 min",
-                "movie_image" => "https://images.justwatch.com/poster/354328131/s332/house-on-haunted-hill-1.avif"
-            ]
-        ]);    
-        break;        
-    case '103':
-        echo json_encode([
-            "info" => [
-                "plot" => "A married farmer falls under the spell of a slatternly woman from the city, who tries to convince him to drown his wife.",
-                "releasedate" => "1929",
-                "rating" => "8.1",
-                "genre" => "Drama, Romance, Romantic Drama",
-                "duration" => "94 min",
-                "movie_image" => "https://images.justwatch.com/poster/354328131/s332/house-on-haunted-hill-1.avif"
-            ]
-        ]);    
-        break;        
-    default:
-        // Code for authentication (if no action matches)
-        break;
-    }
+    $info = [];
+
+    $data = getTMDbByIMDbId($vod_id, $apiKey);
+    foreach ($data['movie_results'] as $details) {
+        $info['plot'] = $details['overview'];
+        $info['releasedate'] = $details['release_date'];
+        $info['rating'] = $details['vote_average'];
+        $info['genre'] = $details['genre_ids'][0];
+    }            
+
+    echo json_encode($info); 
 } elseif ($action == 'get_series') {
     header('Content-Type: application/json');
     $channels = [];
