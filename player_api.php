@@ -90,11 +90,10 @@ if ($action == 'get_live_streams') {
         if (strpos($line, '#EXTINF:') === 0) {
             $count = $count + 1;
             // Extract Channel Number for ID
-            preg_match('/tvg-id="([^"]+)"/', $line, $chnoMatches);
+            preg_match('/tvg-id="tt([^"]+)"/', $line, $chnoMatches);
             $currentChannel['stream_id'] = (int)$chnoMatches[1];
-            preg_match('/tvg-id="tt([^"]+)"/', $line, $idMatches);
 
-            $data = getTMDbByIMDbId($idMatches[1], $apiKey);
+            $data = getTMDbByIMDbId("tt" . strval($chnoMatches[1]), $apiKey);
             foreach ($data['movie_results'] as $details) {
                 $currentChannel['name'] = $details['title'];
                 $currentChannel['stream_icon'] = "https://image.tmdb.org/t/p/w185/" . $details['poster_path'];
