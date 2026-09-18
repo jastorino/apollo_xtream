@@ -91,7 +91,8 @@ if ($action == 'get_live_streams') {
             $count = $count + 1;
             // Extract Channel Number for ID
             preg_match('/tvg-id="([^"]+)"/', $line, $chnoMatches);
-            $currentChannel['stream_id'] = $chnoMatches[1];
+            $currentChannel['stream_id'] = (int)$chnoMatches[1];
+            preg_match('/tvg-id=tt"([^"]+)"/', $line, $chnoMatches);
 
             $data = getTMDbByIMDbId($chnoMatches[1], $apiKey);
             foreach ($data['movie_results'] as $details) {
