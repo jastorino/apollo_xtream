@@ -135,11 +135,12 @@ if ($action == 'get_live_streams') {
     $data = json_decode($response, true);
 
     foreach ($data['genres'] as $genre) {
-    $categories[] = [
-        'category_id'   => $genre['id'],
-        'category_name' => $genre['name'],
-        'parent_id'     => 0
-    ];
+        $categories[] = [
+            'category_id'   => $genre['id'],
+            'category_name' => $genre['name'],
+            'parent_id'     => 0
+        ];
+    }
 
     echo json_encode($categories); 
 } elseif ($action == 'get_vod_info') {
