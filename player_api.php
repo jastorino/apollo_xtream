@@ -87,22 +87,17 @@ if ($action == 'get_live_streams') {
     foreach ($lines as $line) {
         $line = trim($line);
         if (strpos($line, '#EXTINF:') === 0) {
-            // Extract Name
-            preg_match('/,(.+)$/', $line, $nameMatches);
-            $currentChannel['name'] = $nameMatches[1] ?? 'Unknown';
-            
-            // Extract Logo
-            preg_match('/tvg-logo="([^"]+)"/', $line, $logoMatches);
-            $currentChannel['stream_icon'] = $logoMatches[1] ?? '';
-            
             // Extract Channel Number for ID
             preg_match('/tvg-id="tt([^"]+)"/', $line, $chnoMatches);
             $currentChannel['stream_id'] = (int)$chnoMatches[1] ?? rand(10000, 99999);
 
-            // Extract Group Title for Category ID
-            preg_match('/group-title="([^"]+)"/', $line, $groupMatches);
-            $currentChannel['category_id'] = $groupMatches[1] ?? '';    
-            
+            $data = getTMDbByIMDbId($$chnoMatches[1], $apiKey);
+            foreach ($data['genres'] as $details) {
+                $currentChannel['name'] = $details['title'];
+                $currentChannel['stream_icon'] = "https://image.tmdb.org/t/p/w185/" . $details['poster_path'];
+                $currentChannel['category_id'] = $details['genre_ids'][0];
+                $currentChannel['category_ids'] = $details['genre_ids'];
+            }            
             $currentChannel['stream_type'] = 'movie';
         } elseif (strpos($line, 'http') === 0) {
             $currentChannel['direct_source'] = $line;
@@ -400,4 +395,36 @@ if ($action == 'get_live_streams') {
         "server_info" => ["url" => "https://" . $_SERVER['HTTP_HOST'], "port" => "443"]
     ]);
 }
+
+function getTMDbByIMDbId($imdbId, $apiKey) {
+    // TMDb find endpoint for external IDs
+    $url = "https://api.themoviedb.org/3/find/" . urlencode($imdbId);
+    
+    $params = [
+        "api_key" => $apiKey,
+        "external_source" => "imdb_id"
+    ];
+
+    $queryUrl = $url . "?" . http_build_query($params);
+    
+    // Initialize cURL
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $queryUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    
+    $response = curl_exec($ch);
+    
+    if (curl_errno($ch)) {
+        return "Error: " . curl_error($ch);
+    }
+    
+    curl_close($ch);
+    
+    // Decode the JSON response
+    $data = json_decode($response, true);
+    
+    return $data;
+}
+
 ?>
