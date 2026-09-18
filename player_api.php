@@ -92,7 +92,7 @@ if ($action == 'get_live_streams') {
             $currentChannel['stream_id'] = (int)$chnoMatches[1] ?? rand(10000, 99999);
 
             $data = getTMDbByIMDbId($chnoMatches[1], $apiKey);
-            foreach ($data['genres'] as $details) {
+            foreach ($data['movie_results'] as $details) {
                 $currentChannel['name'] = $details['title'];
                 $currentChannel['stream_icon'] = "https://image.tmdb.org/t/p/w185/" . $details['poster_path'];
                 $currentChannel['category_id'] = $details['genre_ids'][0];
