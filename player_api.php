@@ -98,7 +98,6 @@ if ($action == 'get_live_streams') {
                 $currentChannel['name'] = $details['title'];
                 $currentChannel['stream_icon'] = "https://image.tmdb.org/t/p/w185/" . $details['poster_path'];
                 $currentChannel['category_id'] = $details['genre_ids'][0];
-                $currentChannel['category_ids'] = $details['genre_ids'];
             }            
             $currentChannel['stream_type'] = 'movie';
         } elseif (strpos($line, 'http') === 0) {
