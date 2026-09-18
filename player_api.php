@@ -4,6 +4,7 @@ header('Content-Type: application/json');
 $action = isset($_GET['action']) ? $_GET['action'] : 'auth';
 $user = isset($_GET['username']) ? $_GET['username'] : 'unknown';
 $password = isset($_GET['password']) ? $_GET['password'] : 'unknown';
+$apiKey = "e08a763a7f3242cab49afdcc1ec63987";
 
 // Log the incoming request
 error_log("IPTV Request - User: $user, Password: $password Action: $action");
@@ -114,30 +115,32 @@ if ($action == 'get_live_streams') {
 } elseif ($action == 'get_vod_categories') {
     header('Content-Type: application/json');
 
-    $m3uContent = file_get_contents("https://tvnow.best/api/list/$user/$password/m3u8/movies");
-    $lines = explode("\n", $m3uContent);
     $categories = [];
-    $uniqueGroups = [];
+    $url = "https://api.themoviedb.org/3/genre/movie/list";
+    
+    $params = [
+        "api_key" => $apiKey,
+        "language" => "en-US"
+    ];
 
-    foreach ($lines as $line) {
-        $line = trim($line);
-        if (strpos($line, '#EXTINF:') === 0) {
-            // Extract Group Title
-            preg_match('/group-title="([^"]+)"/', $line, $groupMatches);
-            $groupTitle = $groupMatches[1] ?? '';
-            
-            // If a group title exists and we haven't seen it yet
-            if (!empty($groupTitle) && !in_array($groupTitle, $uniqueGroups)) {
-                $uniqueGroups[] = $groupTitle;
-                
-                $categories[] = [
-                    "category_id" => $groupTitle,
-                    "category_name" => $groupTitle,
-                    "parent_id" => 0
-                ];
-            }
-        }
-    }      
+    $queryUrl = $url . "?" . http_build_query($params);
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $queryUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    
+    $response = curl_exec($ch);
+    curl_close($ch);
+    
+    $data = json_decode($response, true);
+
+    foreach ($data['genres'] as $genre) {
+    $categories[] = [
+        'category_id'   => $genre['id'],
+        'category_name' => $genre['name'],
+        'parent_id'     => 0
+    ];
+
     echo json_encode($categories); 
 } elseif ($action == 'get_vod_info') {
     $vod_id = isset($_GET['vod_id']) ? $_GET['vod_id'] : 0;
