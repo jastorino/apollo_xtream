@@ -106,7 +106,7 @@ if ($action == 'get_live_streams') {
             $channels[] = $currentChannel;
             $currentChannel = [];
         }
-        if ($count === 100) {
+        if ($count === 10) {
             break;
         }
     }
