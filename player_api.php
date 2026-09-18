@@ -83,13 +83,15 @@ if ($action == 'get_live_streams') {
     $lines = explode("\n", $m3uContent);
     $channels = [];
     $currentChannel = [];
+    $count = 0;
 
     foreach ($lines as $line) {
+        $count = $count + 1;
         $line = trim($line);
         if (strpos($line, '#EXTINF:') === 0) {
             // Extract Channel Number for ID
-            preg_match('/tvg-id="tt([^"]+)"/', $line, $chnoMatches);
-            $currentChannel['stream_id'] = (int)$chnoMatches[1] ?? rand(10000, 99999);
+            preg_match('/tvg-id="([^"]+)"/', $line, $chnoMatches);
+            $currentChannel['stream_id'] = $chnoMatches[1];
 
             $data = getTMDbByIMDbId($chnoMatches[1], $apiKey);
             foreach ($data['movie_results'] as $details) {
@@ -103,6 +105,9 @@ if ($action == 'get_live_streams') {
             $currentChannel['direct_source'] = $line;
             $channels[] = $currentChannel;
             $currentChannel = [];
+        }
+        if ($count === 10) {
+            break;
         }
     }
 
