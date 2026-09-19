@@ -103,11 +103,17 @@ if ($action == 'get_live_streams') {
         } elseif (strpos($line, 'http') === 0) {
             $currentChannel['direct_source'] = $line;
             $channels[] = $currentChannel;
+            $result = file_put_contents($chnoMatches[1] . '.json', $currentChannel);
+            if ($result !== false) {
+                error_log("File written successfully!");
+            } else {
+                error_log("Error writing to file.");
+            }
             $currentChannel = [];
         }
-        //if ($count === 20) {
-          //  break;
-        //}
+        if ($count === 10) {
+            break;
+        }
     }
     echo json_encode($channels); 
 } elseif ($action == 'get_vod_categories') {
