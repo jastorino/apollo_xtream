@@ -93,7 +93,13 @@ if ($action == 'get_live_streams') {
             preg_match('/tvg-id="tt([^"]+)"/', $line, $chnoMatches);
             $currentChannel['stream_id'] = (int)$chnoMatches[1];
 
-            $data = getTMDbByIMDbId("tt" . strval($chnoMatches[1]), $apiKey);
+            if (file_exists($chnoMatches[1] . '.json')) {
+                $jsonString = file_get_contents($chnoMatches[1] . '.json');
+                $data = json_decode($jsonString, true);
+            } else {
+                $data = getTMDbByIMDbId("tt" . strval($chnoMatches[1]), $apiKey);    
+            }
+            
             foreach ($data['movie_results'] as $details) {
                 $currentChannel['name'] = $details['title'];
                 $currentChannel['stream_icon'] = "https://image.tmdb.org/t/p/w185/" . $details['poster_path'];
@@ -111,7 +117,7 @@ if ($action == 'get_live_streams') {
             }
             $currentChannel = [];
         }
-        if ($count === 10) {
+        if ($count === 20) {
             break;
         }
     }
