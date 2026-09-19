@@ -1,4 +1,5 @@
 <?php
+set_time_limit(0);
 header('Content-Type: application/json');
 
 $action = isset($_GET['action']) ? $_GET['action'] : 'auth';
@@ -92,14 +93,16 @@ if ($action == 'get_live_streams') {
             // Extract Channel Number for ID
             preg_match('/tvg-id="tt([^"]+)"/', $line, $chnoMatches);
             $currentChannel['stream_id'] = (int)$chnoMatches[1];
+            $filePath = 'movies/' . $chnoMatches[1] . '.json';
 
-            if (file_exists($chnoMatches[1] . '.json')) {
-                $jsonString = file_get_contents($chnoMatches[1] . '.json');
-                error_log($jsonString);
+            if (file_exists($filePath)) {
+                $jsonString = file_get_contents($filePath);
+                error_log("Local Fetch: " . $count); 
+                //error_log($jsonString);
                 $data = json_decode($jsonString, true);
             } else {
                 $data = getTMDbByIMDbId("tt" . strval($chnoMatches[1]), $apiKey);   
-                error_log("TMDb: " . $count); 
+                error_log("Remote Fetch: " . $count); 
             }
             
             foreach ($data['movie_results'] as $details) {
@@ -111,24 +114,17 @@ if ($action == 'get_live_streams') {
         } elseif (strpos($line, 'http') === 0) {
             $currentChannel['direct_source'] = $line;
             $channels[] = $currentChannel;
-            if (!file_exists($chnoMatches[1] . '.json')) {
-                $result = file_put_contents($chnoMatches[1] . '.json', $currentChannel);
-            } else { $result = false; }
-            if ($result !== false) {
-                error_log("File written successfully!");
-            } else {
-                error_log("Error writing to file.");
-            }
+            if (!file_exists($filePath)) {
+                $result = file_put_contents($filePath, json_encode($data));
+            } 
             $currentChannel = [];
         }
         if ($count === 20) {
             break;
-        }
+         }
     }
     echo json_encode($channels); 
 } elseif ($action == 'get_vod_categories') {
-    header('Content-Type: application/json');
-
     $categories = [];
     $url = "https://api.themoviedb.org/3/genre/movie/list";
     
@@ -144,7 +140,7 @@ if ($action == 'get_live_streams') {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     
     $response = curl_exec($ch);
-    curl_close($ch);
+    //curl_close($ch);
     
     $data = json_decode($response, true);
 
@@ -161,7 +157,7 @@ if ($action == 'get_live_streams') {
     $vod_id = isset($_GET['vod_id']) ? $_GET['vod_id'] : 0;
     $info = [];
 
-    $data = getTMDbByIMDbId($vod_id, $apiKey);
+    $data = getTMDbByIMDbId('tt'.$vod_id, $apiKey);
     foreach ($data['movie_results'] as $details) {
         $info['plot'] = $details['overview'];
         $info['releasedate'] = $details['release_date'];
@@ -395,7 +391,7 @@ function getTMDbByIMDbId($imdbId, $apiKey) {
         return "Error: " . curl_error($ch);
     }
     
-    curl_close($ch);
+    //curl_close($ch);
     
     // Decode the JSON response
     $data = json_decode($response, true);
