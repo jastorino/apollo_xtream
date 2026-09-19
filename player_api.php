@@ -95,6 +95,7 @@ if ($action == 'get_live_streams') {
 
             if (file_exists($chnoMatches[1] . '.json')) {
                 $jsonString = file_get_contents($chnoMatches[1] . '.json');
+                error_log($jsonString);
                 $data = json_decode($jsonString, true);
             } else {
                 $data = getTMDbByIMDbId("tt" . strval($chnoMatches[1]), $apiKey);   
@@ -112,7 +113,7 @@ if ($action == 'get_live_streams') {
             $channels[] = $currentChannel;
             if (!file_exists($chnoMatches[1] . '.json')) {
                 $result = file_put_contents($chnoMatches[1] . '.json', $currentChannel);
-            }
+            } else { $result = false; }
             if ($result !== false) {
                 error_log("File written successfully!");
             } else {
