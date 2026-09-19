@@ -109,7 +109,7 @@ if ($action == 'get_live_streams') {
             break;
         }
     }
-    error_log($channels);
+    error_log(json_encode($channels));
     echo json_encode($channels); 
 } elseif ($action == 'get_vod_categories') {
     header('Content-Type: application/json');
